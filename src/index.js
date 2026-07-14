@@ -71,10 +71,10 @@ async function sendUsageUpdate(org, organization_id, host) {
     org.dataTransferedOut += 250;
     org.dataTransferedOutCount++;
 
-    const platformOrganization = server.config.organization_id;
+    const platformOrganization = server.organization_id;
     let organization = await server.crud.send({
         method: 'object.read',
-        // host: server.config.host,
+        // host: server.host,
         array: 'organizations',
         object: { _id: organization_id },
         organization_id: platformOrganization
@@ -114,7 +114,7 @@ async function sendUsageUpdate(org, organization_id, host) {
             isResetDataTransfer = true;
             server.crud.send({
                 method: 'object.create',
-                // host: server.config.host,
+                // host: server.host,
                 array: 'transactions',
                 object: {
                     organization_id,
@@ -142,7 +142,7 @@ async function sendUsageUpdate(org, organization_id, host) {
 
     let balanceUpdate = {
         method: 'object.update',
-        // host: server.config.host,
+        // host: server.host,
         array: 'organizations',
         object: { _id: organization_id },
         organization_id: platformOrganization,
