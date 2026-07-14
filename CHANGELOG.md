@@ -1,3 +1,15 @@
+## [1.2.2](https://github.com/CoCreate-app/CoCreate-usage/compare/v1.2.1...v1.2.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* remove unnecessary console logs in init function for cleaner output ([af5f039](https://github.com/CoCreate-app/CoCreate-usage/commit/af5f03958fa5e84008411e99186bcdea438e7087))
+* removed post install ([933f2b6](https://github.com/CoCreate-app/CoCreate-usage/commit/933f2b6b9a7a551afb7e2723bfd02de9a72f2019))
+* semantic version handling. Reorganize .gitignore for improved clarity and structure ([9d67031](https://github.com/CoCreate-app/CoCreate-usage/commit/9d67031f6144a5b767ff0a2b6d487b14cbbd33aa))
+* update module export to ES6 syntax in release.config.js ([8908cb7](https://github.com/CoCreate-app/CoCreate-usage/commit/8908cb7ea61ceb65d1151909e8706c0a54046903))
+* update organization ID reference and host variable in sendUsageUpdate function ([4f4cc11](https://github.com/CoCreate-app/CoCreate-usage/commit/4f4cc11f9d0757b27c71f180ce83895fb2c436cd))
+* update package.json to use ESM and restructure entry points ([c96c5db](https://github.com/CoCreate-app/CoCreate-usage/commit/c96c5db22a621d2af2a151d2173ffaa265c03f6e))
+
 ## [1.2.1](https://github.com/CoCreate-app/CoCreate-usage/compare/v1.2.0...v1.2.1) (2025-05-01)
 
 
