@@ -232,7 +232,6 @@ async function setBandwidth({ type, data, organization_id }) {
 function init() {
     if (server && server.isInitialized && server.crud && server.wsManager) {
         server.wsManager.on('setBandwidth', (data) => setBandwidth(data));
-        console.log('[@cocreate/usage] Bandwidth monitoring event triggers successfully registered.');
     } else {
         // If the server and WebSocket managers are not yet ready, retry in 500ms
         setTimeout(init, 500);
