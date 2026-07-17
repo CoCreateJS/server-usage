@@ -1,244 +1,287 @@
-/********************************************************************************
- * Copyright (C) 2023 CoCreate and Contributors.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- ********************************************************************************/
+import crud from '@cocreate/crud-server';
 
-// Commercial Licensing Information:
-// For commercial use of this software without the copyleft provisions of the AGPLv3,
-// you must obtain a commercial license from CoCreate LLC.
-// For details, visit <https://cocreate.app/licenses/> or contact us at sales@cocreate.app.
+class CoCreateUsage {
+    constructor(platformOrgId) {
+        this.platformOrgId = platformOrgId; // Master platform organization ID
 
-import server from '@cocreate/server';
+        // Constants
+        this.FLUSH_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10 Megabytes
+        this.TENANT_INTERVAL_MS = 60 * 1000;            // 1 Minute
 
-// ==========================================
-// Module-Level Sandbox State (ESM Singleton Container)
-// ==========================================
-const organizations = new Map();
+        // Double-buffer map tracking separate platform and tenant blocks per organization
+        this.bandwidthMap = new Map();
 
-/**
- * Normalizes input data types and calculates payload sizing in bytes.
- */
-function getBytes(data) {
-    if (typeof data === 'number')
-        return data;
-    else if (data instanceof Buffer)
-        return data.byteLength || 0;
-    else if (data instanceof String || typeof data === 'string')
-        return Buffer.byteLength(data, 'utf8') || 0;
-    else if (typeof data === 'object' && data !== null)
-        return Buffer.byteLength(JSON.stringify(data), 'utf8') || 0;
-    else return 0;
-}
+        // Initialize the Event Listeners
+        this.initEventListeners();
+    }
 
-/**
- * Determines pricing tier rates based on aggregate historical usage indicators.
- */
-function getRate(totalUsage = 0) {
-    const tiers = [
-        { limit: 1, rate: 10 },
-        { limit: 10, rate: 5 },
-        { limit: 100, rate: 2.5 },
-        { limit: 1000, rate: 1.125 },
-        { limit: 10000, rate: 0.562 },
-        { limit: 100000, rate: 0.281 },
-        { limit: 1000000, rate: 0.145 }
-    ];
+    /**
+     * Connects directly to process event signals
+     */
+    initEventListeners() {
+        // Unified Application-Wide System Interceptor
+        // Expects an input object: { organization_id, data, type: 'ingress' | 'egress' }
+        process.on('usage', (payload) => {
+            if (!payload || typeof payload !== 'object') return;
+            
+            const { organization_id, data, type } = payload;
+            if (organization_id) {
+                this.trackUsage(organization_id, data, type || 'ingress');
+            }
+        });
 
-    const matchingTier = tiers.find(tier => totalUsage < tier.limit);
-    return matchingTier ? matchingTier.rate : 0.12;
-}
+        // Condition 1: Handle targeted eviction caught via native process messaging
+        process.on('orgDeleted', (organization_id) => {
+            if (this.bandwidthMap.has(organization_id)) {
+                console.log(`[USAGE] Org deleted event caught for ${organization_id}. Flushing final databases.`);
+                this.flushAndClearSingle(organization_id);
+            }
+        });
 
-/**
- * Calculates and writes final bandwidth depletion transactions to the platform database.
- */
-async function sendUsageUpdate(org, organization_id, host) {
-    if (!server || !server.crud) return;
-    delete org.debounce;
+        // Condition 2: Local fallback for Graceful Restarts / Shutdowns
+        process.on('SIGTERM', () => this.handleGracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => this.handleGracefulShutdown('SIGINT'));
+    }
 
-    org.dataTransferedOut += 250;
-    org.dataTransferedOutCount++;
-
-    const platformOrganization = server.organization_id;
-    let organization = await server.crud.send({
-        method: 'object.read',
-        // host: server.host,
-        array: 'organizations',
-        object: { _id: organization_id },
-        organization_id: platformOrganization
-    });
-
-    org.dataTransferedIn += getBytes(platformOrganization);
-    org.dataTransferedInCount++;
-
-    if (organization && organization.object && organization.object[0]) {
-        organization = organization.object[0];
-    } else return;
-
-    if (server.wsManager && server.wsManager.organizations.has(organization_id)) {
-        const socketOrg = server.wsManager.organizations.get(organization_id);
-        if (organization.balance <= 0) {
-            socketOrg.status = false;
-            socketOrg.organizationBalance = false;
-            socketOrg.error = 'Your balance has fallen below 0';
-        } else {
-            socketOrg.status = true;
-            socketOrg.organizationBalance = true;
-            socketOrg.error = '';
+    /**
+     * High-performance, robust byte-calculation routine.
+     * Accurately parses binary files (images, video chunks), text responses, and data objects.
+     */
+    calculatePayloadBytes(data) {
+        if (data === null || data === undefined) return 0;
+        
+        try {
+            // Case 1: Raw media streams, files, or binary chunks (Buffers / TypedArrays)
+            if (Buffer.isBuffer(data)) {
+                return data.length;
+            }
+            if (data instanceof Uint8Array || data.buffer instanceof ArrayBuffer) {
+                return data.byteLength || data.length || 0;
+            }
+            
+            // Case 2: Plain Text / Base64 Encoded Strings
+            if (typeof data === 'string') {
+                return Buffer.byteLength(data, 'utf8');
+            }
+            
+            // Case 3: Native JavaScript Objects & Arrays (Database schemas, API JSON packets)
+            if (typeof data === 'object') {
+                return Buffer.byteLength(JSON.stringify(data), 'utf8');
+            }
+            
+            // Case 4: Fallback for primitive datatypes (numbers, booleans, etc.)
+            return Buffer.byteLength(String(data), 'utf8');
+        } catch (error) {
+            console.error('[USAGE ERROR] Failed to safely calculate payload byte scale:', error);
+            return 0;
         }
     }
 
-    let timeStamp = new Date(new Date().toISOString());
-    let isExpired = false;
-    if (organization.lastDeposit) {
-        let lastDeposit = new Date(organization.lastDeposit);
-        isExpired = lastDeposit <= timeStamp.setFullYear(timeStamp.getFullYear() - 1);
-    }
+    /**
+     * Main entry point to track incoming traffic.
+     */
+    trackUsage(organization_id, data, direction = 'ingress') {
+        const now = Date.now();
+        const incomingBytes = this.calculatePayloadBytes(data);
 
-    let isResetDataTransfer = false;
-    if (organization.modified && organization.modified.on) {
-        let previousTimeStamp = new Date(organization.modified.on);
-        if (previousTimeStamp.getMonth() !== timeStamp.getMonth()) {
-            isResetDataTransfer = true;
-            server.crud.send({
-                method: 'object.create',
-                // host: server.host,
-                array: 'transactions',
-                object: {
-                    organization_id,
-                    type: "withdrawal",
-                    dataTransfered: organization.dataTransfered,
-                    previousTimeStamp
+        // If this is a brand new organization session, initialize our distinct tracking layers
+        if (!this.bandwidthMap.has(organization_id)) {
+            const tenantTimer = setInterval(() => {
+                this.flushTenantWindow(organization_id);
+            }, this.TENANT_INTERVAL_MS);
+
+            this.bandwidthMap.set(organization_id, {
+                // Buffer A: Tenant 1-minute accumulator (system_usage)
+                tenant: {
+                    ingressBytes: 0,
+                    egressBytes: 0,
+                    totalBytes: 0,
+                    count: 0,
+                    sampleStart: now,
+                    sampleEnd: now
                 },
-                organization_id: platformOrganization,
-                timeStamp
+                // Buffer B: Platform master accumulator (system_bandwidth)
+                platform: {
+                    ingressBytes: 0,
+                    egressBytes: 0,
+                    totalBytes: 0,
+                    count: 0,
+                    sampleStart: now,
+                    sampleEnd: now
+                },
+                tenantTimer
             });
-            organization.dataTransfered = 0;
+        }
+
+        const stats = this.bandwidthMap.get(organization_id);
+
+        // 1. Accumulate Tenant Buffer (Flushes on interval)
+        if (direction === 'ingress') {
+            stats.tenant.ingressBytes += incomingBytes;
+        } else if (direction === 'egress') {
+            stats.tenant.egressBytes += incomingBytes;
+        }
+        stats.tenant.totalBytes += incomingBytes;
+        stats.tenant.count += 1;
+        stats.tenant.sampleEnd = now;
+
+        // 2. Accumulate Platform Buffer (Flushes on event triggers / 10MB only)
+        if (direction === 'ingress') {
+            stats.platform.ingressBytes += incomingBytes;
+        } else if (direction === 'egress') {
+            stats.platform.egressBytes += incomingBytes;
+        }
+        stats.platform.totalBytes += incomingBytes;
+        stats.platform.count += 1;
+        stats.platform.sampleEnd = now;
+
+        // 3. Platform Trigger: Flush to the master platform ledger if we hit 10MB
+        if (stats.platform.totalBytes >= this.FLUSH_THRESHOLD_BYTES) {
+            // console.log(`[USAGE] Org ${organization_id} hit 10MB platform threshold. Flushing platform system_bandwidth.`);
+            this.flushPlatformWindow(organization_id);
         }
     }
 
-    let dataTransfered = org.dataTransferedIn + org.dataTransferedOut;
-    dataTransfered = dataTransfered / 1073741824;
-    dataTransfered = dataTransfered.toFixed(32);
-    dataTransfered = parseFloat(dataTransfered);
+    /**
+     * PIPELINE A: Handles the 1-minute interval flush to the client tenant's database
+     */
+    async flushTenantWindow(organization_id) {
+        const stats = this.bandwidthMap.get(organization_id);
+        if (!stats || stats.tenant.totalBytes === 0) return;
 
-    let rate = getRate(organization.dataTransfered);
-    let amount = dataTransfered * rate;
-    amount = -amount;
-    amount = amount.toFixed(32);
-    amount = parseFloat(amount);
+        const tenantData = stats.tenant;
 
-    let balanceUpdate = {
-        method: 'object.update',
-        // host: server.host,
-        array: 'organizations',
-        object: { _id: organization_id },
-        organization_id: platformOrganization,
-        timeStamp
-    };
+        // Save exactly one document representing this complete 1-minute segment to their partition
+        await this.saveToTenantBilling(organization_id, tenantData);
 
-    if (isExpired)
-        balanceUpdate.object['balance'] = 0;
-    else
-        balanceUpdate.object.$inc = { balance: amount };
+        // Reset ONLY the tenant accumulator to begin a fresh 1-minute block
+        const now = Date.now();
+        stats.tenant = {
+            ingressBytes: 0,
+            egressBytes: 0,
+            totalBytes: 0,
+            count: 0,
+            sampleStart: now,
+            sampleEnd: now
+        };
+    }
 
-    if (isResetDataTransfer)
-        balanceUpdate.object['dataTransfered'] = 0;
-    else if (!balanceUpdate.object.$inc)
-        balanceUpdate.object.$inc = { dataTransfered };
-    else
-        balanceUpdate.object.$inc.dataTransfered = dataTransfered;
+    /**
+     * PIPELINE B: Handles targeted platform flushes (when 10MB limit is reached)
+     */
+    async flushPlatformWindow(organization_id) {
+        const stats = this.bandwidthMap.get(organization_id);
+        if (!stats || stats.platform.totalBytes === 0) return;
 
-    server.crud.send(balanceUpdate);
+        const platformData = stats.platform;
 
-    let transaction = {
-        method: 'object.create',
-        host,
-        array: 'transactions',
-        object: {
-            organization_id,
-            type: "withdrawal",
-            amount,
-            rate,
-            dataTransfered,
-            ...org
-        },
-        organization_id,
-        timeStamp
-    };
+        // Save platform ledger record
+        await this.saveToLedgerDatabase(organization_id, platformData);
 
-    server.crud.send(transaction);
-}
+        // Reset ONLY the platform long-term memory accumulator
+        const now = Date.now();
+        stats.platform = {
+            ingressBytes: 0,
+            egressBytes: 0,
+            totalBytes: 0,
+            count: 0,
+            sampleStart: now,
+            sampleEnd: now
+                };
+    }
 
-/**
- * Event-driven handler that accumulates payload footprints and manages write debouncing.
- */
-async function setBandwidth({ type, data, organization_id }) {
-    try {
-        let dataTransfered = getBytes(data);
+    /**
+     * Target eviction: Clears timers and flushes all outstanding tenant & platform balances
+     */
+    async flushAndClearSingle(organization_id) {
+        const stats = this.bandwidthMap.get(organization_id);
+        if (!stats) return;
 
-        if (!dataTransfered || !organization_id)
-            return;
-
-        let org = organizations.get(organization_id);
-        if (!org) {
-            org = {};
-            org.debounce = setTimeout(() => {
-                sendUsageUpdate(org, organization_id, data.host);
-                organizations.delete(organization_id);
-            }, 60000);
-
-            org.dataTransferedIn = 0;
-            org.dataTransferedInCount = 0;
-            org.dataTransferedOut = 0;
-            org.dataTransferedOutCount = 0;
-
-            organizations.set(organization_id, org);
+        // De-allocate the 1-minute background loop instantly
+        if (stats.tenantTimer) {
+            clearInterval(stats.tenantTimer);
         }
 
-        if (type === 'in') {
-            org.dataTransferedIn = dataTransfered;
-            org.dataTransferedInCount++;
-        } else if (type === 'out') {
-            org.dataTransferedOut = dataTransfered;
-            org.dataTransferedOutCount++;
-        } else {
-            console.log('else');
+        // Flush any partial unsaved records remaining in either pipeline
+        await Promise.all([
+            this.flushTenantWindow(organization_id),
+            this.flushPlatformWindow(organization_id)
+        ]);
+
+        // Evict from active tracker
+        this.bandwidthMap.delete(organization_id);
+    }
+
+    /**
+     * Guaranteed local intercept for graceful shutdowns
+     */
+    async handleGracefulShutdown(signal) {
+        console.log(`[SHUTDOWN] ${signal} received. Force flushing all active tenant & platform memory maps...`);
+        
+        const flushPromises = [];
+        for (const organization_id of this.bandwidthMap.keys()) {
+            flushPromises.push(this.flushAndClearSingle(organization_id));
         }
 
-    } catch (error) {
-        console.log('Usage error', error);
+        await Promise.all(flushPromises);
+        this.bandwidthMap.clear();
+        console.log('[SHUTDOWN] All pending usage pipelines successfully saved. Exiting process safely.');
+        process.exit(0);
+    }
+
+    /**
+     * CRUD Adapter: Platform Bandwidth Collection (Private time-series log)
+     * Writes into the platform's sandbox segment, cataloging target clients in "organization".
+     */
+    async saveToLedgerDatabase(organization_id, stats) {
+        try {
+            await crud.send({
+                method: 'object.create',
+                array: 'system_bandwidth',
+                object: {
+                    organization_id: this.platformOrgId, // Platform workspace sandbox route
+                    organization: organization_id,       // The actual client tenant who generated the bandwidth
+                    ingressBytes: stats.ingressBytes,
+                    egressBytes: stats.egressBytes,
+                    totalBytes: stats.totalBytes,
+                    totalRequests: stats.count,
+                    sampleStart: new Date(stats.sampleStart),
+                    sampleEnd: new Date(stats.sampleEnd),
+                    durationMs: stats.sampleEnd - stats.sampleStart,
+                    processed: false                     // Ready for asynchronous multi-tenant billing calculations
+                },
+                organization_id: this.platformOrgId      // Outermost routing targeting the Platform's DB partition
+            });
+        } catch (error) {
+            console.error(`[DB ERROR] Failed to write to system_bandwidth for ${organization_id}:`, error);
+        }
+    }
+
+    /**
+     * CRUD Adapter: Tenant Usage Collection (Their 1-Minute Dashboard Stream)
+     * Writes directly to the tenant's partition under the safe, system namespace "system_usage"
+     */
+    async saveToTenantBilling(organization_id, stats) {
+        try {
+            await crud.send({
+                method: 'object.create',
+                array: 'system_usage',
+                object: {
+                    organization_id,                     // Tenant's sandbox segment route
+                    ingressBytes: stats.ingressBytes,
+                    egressBytes: stats.egressBytes,
+                    totalBytes: stats.totalBytes,
+                    totalRequests: stats.count,
+                    sampleStart: new Date(stats.sampleStart),
+                    sampleEnd: new Date(stats.sampleEnd),
+                    durationMs: stats.sampleEnd - stats.sampleStart
+                },
+                organization_id: organization_id         // Outermost routing targeting the Client's DB partition
+            });
+        } catch (error) {
+            console.error(`[DB ERROR] Failed to write to system_usage for ${organization_id}:`, error);
+        }
     }
 }
 
-/**
- * Auto-initialization loop.
- * Silently polls to verify that the unified server orchestrator is fully loaded,
- * and that both the database (crud) and socket manager (wsManager) have completed
- * their initial handshakes, then attaches active bandwidth monitoring triggers.
- */
-function init() {
-    if (server && server.isInitialized && server.crud && server.wsManager) {
-        server.wsManager.on('setBandwidth', (data) => setBandwidth(data));
-    } else {
-        // If the server and WebSocket managers are not yet ready, retry in 500ms
-        setTimeout(init, 500);
-    }
-}
-
-// Auto-execute initialization upon module load
-init();
-
-export default init;
+export default CoCreateUsage;
