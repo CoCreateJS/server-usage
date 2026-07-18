@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/CoCreate-app/CoCreate-usage/compare/v1.3.0...v1.4.0) (2026-07-18)
+
+
+### Features
+
+* enhance event listener handling and improve logging for organization deletion ([cca2e40](https://github.com/CoCreate-app/CoCreate-usage/commit/cca2e408ba2c6599aab2b56430b1d74b923fbb57))
+* refactor usage tracking with new bandwidth management and event listeners ([76f8ddb](https://github.com/CoCreate-app/CoCreate-usage/commit/76f8ddb539ad6a3384ed5d1557b1e36b9d64222a))
+
 # [1.3.0](https://github.com/CoCreate-app/CoCreate-usage/compare/v1.2.2...v1.3.0) (2026-07-17)
 
 
