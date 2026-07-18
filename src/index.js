@@ -1,3 +1,20 @@
+/********************************************************************************
+ * Copyright (C) 2023 CoCreate and Contributors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ ********************************************************************************/
+
 import crud from '@cocreate/crud-server';
 
 class CoCreateUsage {
@@ -16,7 +33,7 @@ class CoCreateUsage {
     }
 
     /**
-     * Connects directly to process event signals
+     * Connects directly to process event signals.
      */
     initEventListeners() {
         // Unified Application-Wide System Interceptor
@@ -30,17 +47,19 @@ class CoCreateUsage {
             }
         });
 
-        // Condition 1: Handle targeted eviction caught via native process messaging
-        process.on('orgDeleted', (organization_id) => {
+        // Dynamic Eviction Loop: Caught via native process messaging.
+        // Triggers clean flushes and timer de-allocations during standard disconnects or orchestrator shutdowns.
+        process.on('orgDeleted', async (organization_id) => {
             if (this.bandwidthMap.has(organization_id)) {
-                console.log(`[USAGE] Org deleted event caught for ${organization_id}. Flushing final databases.`);
-                this.flushAndClearSingle(organization_id);
+                console.log(`[USAGE] Event Received: Flushing pending data pipelines for Org: ${organization_id}`);
+                try {
+                    await this.flushAndClearSingle(organization_id);
+                    console.log(`[USAGE] Flushing Completed: Memory registry successfully cleared for Org: ${organization_id}`);
+                } catch (err) {
+                    console.error(`[USAGE ERROR] Failed to cleanly flush data during orgDeleted event for ${organization_id}:`, err);
+                }
             }
         });
-
-        // Condition 2: Local fallback for Graceful Restarts / Shutdowns
-        process.on('SIGTERM', () => this.handleGracefulShutdown('SIGTERM'));
-        process.on('SIGINT', () => this.handleGracefulShutdown('SIGINT'));
     }
 
     /**
@@ -137,7 +156,6 @@ class CoCreateUsage {
 
         // 3. Platform Trigger: Flush to the master platform ledger if we hit 10MB
         if (stats.platform.totalBytes >= this.FLUSH_THRESHOLD_BYTES) {
-            // console.log(`[USAGE] Org ${organization_id} hit 10MB platform threshold. Flushing platform system_bandwidth.`);
             this.flushPlatformWindow(organization_id);
         }
     }
@@ -187,7 +205,7 @@ class CoCreateUsage {
             count: 0,
             sampleStart: now,
             sampleEnd: now
-                };
+        };
     }
 
     /**
@@ -213,23 +231,6 @@ class CoCreateUsage {
     }
 
     /**
-     * Guaranteed local intercept for graceful shutdowns
-     */
-    async handleGracefulShutdown(signal) {
-        console.log(`[SHUTDOWN] ${signal} received. Force flushing all active tenant & platform memory maps...`);
-        
-        const flushPromises = [];
-        for (const organization_id of this.bandwidthMap.keys()) {
-            flushPromises.push(this.flushAndClearSingle(organization_id));
-        }
-
-        await Promise.all(flushPromises);
-        this.bandwidthMap.clear();
-        console.log('[SHUTDOWN] All pending usage pipelines successfully saved. Exiting process safely.');
-        process.exit(0);
-    }
-
-    /**
      * CRUD Adapter: Platform Bandwidth Collection (Private time-series log)
      * Writes into the platform's sandbox segment, cataloging target clients in "organization".
      */
@@ -248,7 +249,7 @@ class CoCreateUsage {
                     sampleStart: new Date(stats.sampleStart),
                     sampleEnd: new Date(stats.sampleEnd),
                     durationMs: stats.sampleEnd - stats.sampleStart,
-                    processed: false                     // Ready for asynchronous multi-tenant billing calculations
+                    processed: false                     // Ready for asynchronous billing calculations
                 },
                 organization_id: this.platformOrgId      // Outermost routing targeting the Platform's DB partition
             });
