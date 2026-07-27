@@ -110,7 +110,7 @@ class CoCreateUsage {
             }, this.TENANT_INTERVAL_MS);
 
             this.bandwidthMap.set(organization_id, {
-                // Buffer A: Tenant 1-minute accumulator (system_usage)
+                // Buffer A: Tenant 1-minute accumulator (server_usage)
                 tenant: {
                     ingressBytes: 0,
                     egressBytes: 0,
@@ -119,7 +119,7 @@ class CoCreateUsage {
                     sampleStart: now,
                     sampleEnd: now
                 },
-                // Buffer B: Platform master accumulator (system_bandwidth)
+                // Buffer B: Platform master accumulator (server_bandwidth)
                 platform: {
                     ingressBytes: 0,
                     egressBytes: 0,
@@ -238,7 +238,7 @@ class CoCreateUsage {
         try {
             await crud.send({
                 method: 'object.create',
-                array: 'system_bandwidth',
+                array: 'servers_bandwidth',
                 object: {
                     organization_id: this.platformOrgId, // Platform workspace sandbox route
                     organization: organization_id,       // The actual client tenant who generated the bandwidth
@@ -254,19 +254,19 @@ class CoCreateUsage {
                 organization_id: this.platformOrgId      // Outermost routing targeting the Platform's DB partition
             });
         } catch (error) {
-            console.error(`[DB ERROR] Failed to write to system_bandwidth for ${organization_id}:`, error);
+            console.error(`[DB ERROR] Failed to write to servers_bandwidth for ${organization_id}:`, error);
         }
     }
 
     /**
      * CRUD Adapter: Tenant Usage Collection (Their 1-Minute Dashboard Stream)
-     * Writes directly to the tenant's partition under the safe, system namespace "system_usage"
+     * Writes directly to the tenant's partition under the safe, system namespace "servers_usage"
      */
     async saveToTenantBilling(organization_id, stats) {
         try {
             await crud.send({
                 method: 'object.create',
-                array: 'system_usage',
+                array: 'servers_usage',
                 object: {
                     organization_id,                     // Tenant's sandbox segment route
                     ingressBytes: stats.ingressBytes,
@@ -280,7 +280,7 @@ class CoCreateUsage {
                 organization_id: organization_id         // Outermost routing targeting the Client's DB partition
             });
         } catch (error) {
-            console.error(`[DB ERROR] Failed to write to system_usage for ${organization_id}:`, error);
+            console.error(`[DB ERROR] Failed to write to servers_usage for ${organization_id}:`, error);
         }
     }
 }
