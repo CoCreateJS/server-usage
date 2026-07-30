@@ -32,6 +32,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@cocreate/crud-server": "^1.39.0"
+    "@cocreate/crud-server": "^1.40.0"
   }
 }
