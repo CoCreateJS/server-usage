@@ -95,9 +95,44 @@ function initEventListeners() {
 }
 
 /**
+ * Calculates the number of bytes represented by a usage payload.
+ * Supports binary data, strings, JSON-compatible objects, and primitives.
+ *
+ * @param {*} data - Payload to measure
+ * @returns {number} Payload size in bytes
+ */
+function calculatePayloadBytes(data) {
+    if (data === null || data === undefined) return 0;
+
+    try {
+        if (Buffer.isBuffer(data)) {
+            return data.length;
+        }
+
+        if (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) {
+            return data.byteLength || 0;
+        }
+
+        if (typeof data === 'string') {
+            return Buffer.byteLength(data, 'utf8');
+        }
+
+        if (typeof data === 'object') {
+            return Buffer.byteLength(JSON.stringify(data), 'utf8');
+        }
+
+        return Buffer.byteLength(String(data), 'utf8');
+    } catch (error) {
+        console.error('[@cocreate/usage] Failed to calculate payload bytes:', error);
+        return 0;
+    }
+}
+
+/**
  * Public ingress wrapper for transmitting bandwidth metrics into the usage system.
- * Accepts a normalized object: { organization_id, type, payload, bytes, ingressBytes, egressBytes }.
- * 
+ * Accepts a normalized object: { organization_id, type, data, payload, bytes, ingressBytes, egressBytes }.
+ * `data` is the established event field; `payload` remains available as an alias.
+ *
  * @param {Object} options - Usage transmission options
  */
 function send(options = {}) {
@@ -109,17 +144,10 @@ function send(options = {}) {
     let ingressBytes = options.ingressBytes || 0;
     let egressBytes = options.egressBytes || 0;
 
-    let byteCount = options.bytes || 0;
-    if (!byteCount && options.payload !== undefined && options.payload !== null) {
-        const payload = options.payload;
-        if (typeof payload === 'string') {
-            byteCount = Buffer.byteLength(payload);
-        } else if (Buffer.isBuffer(payload)) {
-            byteCount = payload.length;
-        } else if (payload instanceof ArrayBuffer || ArrayBuffer.isView(payload)) {
-            byteCount = payload.byteLength || 0;
-        }
-    }
+    const payload = options.data !== undefined ? options.data : options.payload;
+    const byteCount = options.bytes !== undefined
+        ? Number(options.bytes) || 0
+        : calculatePayloadBytes(payload);
 
     if (type === 'ingress') {
         ingressBytes += byteCount;
@@ -404,6 +432,7 @@ async function init(serverInstance, options = {}) {
         stop,
         send,
         accumulate,
+        calculatePayloadBytes,
         save,
     };
 }
