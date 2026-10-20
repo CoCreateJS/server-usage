@@ -24,6 +24,11 @@ let isRunning = false;                          // Service execution flag
 let listenersBound = false;                     // Process event listener guard
 let usageConfig = {};                           // In-memory configuration registry
 
+function logPrefix() {
+    const workerId = server?.workerId || process.env.WORKER_ID;
+    return `[@cocreate/usage] ${workerId ? `[WORKER ${workerId}]` : '[MASTER]'}`;
+}
+
 // Default configuration settings
 const defaults = {
     enabled: true,
@@ -71,7 +76,7 @@ async function loadUsageConfig() {
         if (sysConfig) dotNotationToObject(usageConfig, sysConfig);
         if (dbConfig) dotNotationToObject(usageConfig, dbConfig);
     } catch (err) {
-        console.error('[@cocreate/usage] Error loading configuration:', err);
+        console.error(`${logPrefix()} Error loading configuration:`, err);
     }
     return usageConfig;
 }
@@ -100,13 +105,13 @@ function initEventListeners() {
 
     process.on('usage', (options) => {
         Promise.resolve(send(options)).catch(error => {
-            console.error('[@cocreate/usage] Failed to process usage event:', error);
+            console.error(`${logPrefix()} Failed to process usage event:`, error);
         });
     });
 
     process.on('organization.evicted', (orgId) => {
         flushOrg(orgId).catch(err => {
-            console.error(`[@cocreate/usage] Error flushing org ${orgId} on deletion:`, err);
+            console.error(`${logPrefix()} Error flushing org ${orgId} on deletion:`, err);
         });
     });
 
@@ -114,7 +119,7 @@ function initEventListeners() {
         try {
             await save();
         } catch (err) {
-            console.error('[@cocreate/usage] Error during shutdown save:', err);
+            console.error(`${logPrefix()} Error during shutdown save:`, err);
         }
     };
 
@@ -150,7 +155,7 @@ function calculatePayloadBytes(data) {
 
         return Buffer.byteLength(String(data), 'utf8');
     } catch (error) {
-        console.error('[@cocreate/usage] Failed to calculate payload bytes:', error);
+        console.error(`${logPrefix()} Failed to calculate payload bytes:`, error);
         return 0;
     }
 }
@@ -802,7 +807,7 @@ function accumulateAI(options = {}) {
             platform: new Map(),
             timer: setInterval(() => {
                 flushAIWindow(organization_id).catch(err => {
-                    console.error(`[@cocreate/usage] Error flushing AI usage for ${organization_id}:`, err);
+                    console.error(`${logPrefix()} Error flushing AI usage for ${organization_id}:`, err);
                 });
             }, getTenantIntervalMs())
         };
@@ -866,7 +871,7 @@ function accumulate(organization_id, ingressBytes = 0, egressBytes = 0) {
             },
             tenantTimer: setInterval(() => {
                 flushTenantWindow(organization_id).catch(err => {
-                    console.error(`[@cocreate/usage] Error flushing tenant window for ${organization_id}:`, err);
+                    console.error(`${logPrefix()} Error flushing tenant window for ${organization_id}:`, err);
                 });
             }, getTenantIntervalMs())
         };
@@ -1022,7 +1027,7 @@ function createAIUsageObject(organization_id, stats) {
 async function saveAIToTenantLedger(organization_id, stats) {
     try {
         if (!server?.crud) {
-            console.error('[@cocreate/usage] server.crud is not available to save tenant AI usage.');
+            console.error(`${logPrefix()} server.crud is not available to save tenant AI usage.`);
             return;
         }
         await server.crud.send({
@@ -1032,14 +1037,14 @@ async function saveAIToTenantLedger(organization_id, stats) {
             organization_id
         });
     } catch (error) {
-        console.error(`[@cocreate/usage] Failed to write tenant AI usage for ${organization_id}:`, error);
+        console.error(`${logPrefix()} Failed to write tenant AI usage for ${organization_id}:`, error);
     }
 }
 
 async function saveAIToPlatformLedger(organization_id, stats) {
     try {
         if (!server?.crud) {
-            console.error('[@cocreate/usage] server.crud is not available to save platform AI usage.');
+            console.error(`${logPrefix()} server.crud is not available to save platform AI usage.`);
             return;
         }
         await server.crud.send({
@@ -1053,7 +1058,7 @@ async function saveAIToPlatformLedger(organization_id, stats) {
             organization_id: platformOrgId
         });
     } catch (error) {
-        console.error(`[@cocreate/usage] Failed to write platform AI usage for ${organization_id}:`, error);
+        console.error(`${logPrefix()} Failed to write platform AI usage for ${organization_id}:`, error);
     }
 }
 
@@ -1064,7 +1069,7 @@ async function saveAIToPlatformLedger(organization_id, stats) {
 async function saveToLedgerDatabase(organization_id, stats) {
     try {
         if (!server?.crud) {
-            console.error('[@cocreate/usage] server.crud is not available to save bandwidth ledger.');
+            console.error(`${logPrefix()} server.crud is not available to save bandwidth ledger.`);
             return;
         }
         await server.crud.send({
@@ -1085,7 +1090,7 @@ async function saveToLedgerDatabase(organization_id, stats) {
             organization_id: platformOrgId        // Direct routing to Platform DB partition
         });
     } catch (error) {
-        console.error(`[@cocreate/usage] Failed to write to servers_bandwidth for ${organization_id}:`, error);
+        console.error(`${logPrefix()} Failed to write to servers_bandwidth for ${organization_id}:`, error);
     }
 }
 
@@ -1096,7 +1101,7 @@ async function saveToLedgerDatabase(organization_id, stats) {
 async function saveToTenantBilling(organization_id, stats) {
     try {
         if (!server?.crud) {
-            console.error('[@cocreate/usage] server.crud is not available to save tenant usage.');
+            console.error(`${logPrefix()} server.crud is not available to save tenant usage.`);
             return;
         }
         await server.crud.send({
@@ -1115,7 +1120,7 @@ async function saveToTenantBilling(organization_id, stats) {
             organization_id: organization_id         // Direct routing to Client DB partition
         });
     } catch (error) {
-        console.error(`[@cocreate/usage] Failed to write to servers_usage for ${organization_id}:`, error);
+        console.error(`${logPrefix()} Failed to write to servers_usage for ${organization_id}:`, error);
     }
 }
 
@@ -1126,7 +1131,7 @@ function start() {
     if (isRunning) return;
     isRunning = true;
     initEventListeners();
-    console.log(`[@cocreate/usage] Usage tracking started.`);
+    console.log(`${logPrefix()} Usage tracking started.`);
 }
 
 /**
@@ -1148,7 +1153,7 @@ function stop() {
     aiUsageMap.clear();
     ledgerQueues.clear();
 
-    console.log(`[@cocreate/usage] Usage tracking stopped.`);
+    console.log(`${logPrefix()} Usage tracking stopped.`);
 }
 
 /**
@@ -1176,10 +1181,10 @@ async function init(serverInstance, options = {}) {
     if (enabled) {
         start();
     } else {
-        console.log('[@cocreate/usage] Usage tracking is disabled.');
+        console.log(`${logPrefix()} Usage tracking is disabled.`);
     }
 
-    console.log(`[@cocreate/usage] Module initialized (Platform Org: ${platformOrgId}).`);
+    console.log(`${logPrefix()} Module initialized (Platform Org: ${platformOrgId}).`);
 
     // Clean public API surface area matching @cocreate/server-telemetry style
     return {
