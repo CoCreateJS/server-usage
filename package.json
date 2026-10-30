@@ -13,6 +13,23 @@
     "javascript-framework"
   ],
   "type": "module",
+  "cocreate": {
+    "environment": [
+      "server"
+    ],
+    "interface": {
+      "schemaVersion": 1,
+      "summary": "CoCreate-usage",
+      "source": "src/index.js",
+      "api": {
+        "exports": [
+          "calculatePayloadBytes",
+          "calculatePrice",
+          "init"
+        ]
+      }
+    }
+  },
   "main": "./src/index.js",
   "publishConfig": {
     "access": "public"
