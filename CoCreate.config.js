@@ -8,8 +8,8 @@ module.exports = {
             "object": {
                 "_id": "6204253780b409001727b73f",
                 "name": "index.html",
-                "path": "/docs/usage",
-                "pathname": "/docs/usage/index.html",
+                "path": "/docs/server-usage",
+                "pathname": "/docs/server-usage/index.html",
                 "src": "{{./docs/index.html}}",
                 "host": [
                     "*"

@@ -1,15 +1,15 @@
-# CoCreate-usage
+# CoCreate Server Usage
 
-A simple usage component in vanilla javascript. Easily configured using HTML5 data-attributes and/or JavaScript API. Take it for a spin in our [playground!](https://cocreate.app/docs/usage)
+CoCreate Server Usage is the server-side usage metering and billing ledger for CoCreate. It records priced consumption, credits and payment events, maintains organization balance projections, and emits balance-gating events for the server cluster.
 
-![GitHub latest release](https://img.shields.io/github/v/release/CoCreate-app/CoCreate-usage?style=flat-square)
-![GitHub contributors](https://img.shields.io/github/contributors/CoCreate-app/CoCreate-usage?style=flat-square)
-![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=SSPL&color=green)
+![GitHub latest release](https://img.shields.io/github/v/release/CoCreateJS/CoCreate-server-usage?style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/CoCreateJS/CoCreate-server-usage?style=flat-square)
+![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=AGPL-3.0&color=green)
 ![Hiring](https://img.shields.io/static/v1?style=flat-square&label=&message=Hiring&color=blueviolet)
 
 ![CoCreate](https://cdn.cocreate.app/logo.png)
 
-[CoCreate Docs](https://cocreate.app/docs/usage)
+[CoCreate Server Usage Docs](https://cocreate.app/docs/server-usage)
 
 ## Usage events
 
@@ -147,29 +147,29 @@ We appreciate your continued support, thank you!
 
 # Announcements
 
-All updates to this library are documented in our [CHANGELOG](https://github.com/CoCreate-app/CoCreate-usage/blob/master/CHANGELOG.md) and [releases](https://github.com/CoCreate-app/CoCreate-usage/releases). You may also subscribe to email for releases and breaking changes.
+All updates to this library are documented in our [CHANGELOG](https://github.com/CoCreateJS/CoCreate-server-usage/blob/master/CHANGELOG.md) and [releases](https://github.com/CoCreateJS/CoCreate-server-usage/releases). You may also subscribe to email for releases and breaking changes.
 
 <a name="roadmap"></a>
 
 # Roadmap
 
-If you are interested in the future direction of this project, please take a look at our open [issues](https://github.com/CoCreate-app/CoCreate-usage/issues) and [pull requests](https://github.com/CoCreate-app/CoCreate-usage/pulls). We would love to hear your feedback.
+If you are interested in the future direction of this project, please take a look at our open [issues](https://github.com/CoCreateJS/CoCreate-server-usage/issues) and [pull requests](https://github.com/CoCreateJS/CoCreate-server-usage/pulls). We would love to hear your feedback.
 
 <a name="about"></a>
 
 # About
 
-CoCreate-usage is guided and supported by the CoCreate Developer Experience Team.
+CoCreate Server Usage is guided and supported by the CoCreate Developer Experience Team.
 
 Please Email the Developer Experience Team [here](mailto:develop@cocreate.app) in case of any queries.
 
-CoCreate-usage is maintained and funded by CoCreate. The names and logos for CoCreate are trademarks of CoCreate, LLC.
+CoCreate Server Usage is maintained and funded by CoCreate. The names and logos for CoCreate are trademarks of CoCreate, LLC.
 
 <a name="contribute"></a>
 
 # How to Contribute
 
-We encourage contribution to our libraries (you might even score some nifty swag), please see our [CONTRIBUTING](https://github.com/CoCreate-app/CoCreate-usage/blob/master/CONTRIBUTING.md) guide for details.
+We encourage contribution to our libraries (you might even score some nifty swag), please see our [CONTRIBUTING](https://github.com/CoCreateJS/CoCreate-server-usage/blob/master/CONTRIBUTING.md) guide for details.
 
 <a name="license"></a>
 
@@ -177,7 +177,7 @@ We encourage contribution to our libraries (you might even score some nifty swag
 
 This software is dual-licensed under the GNU Affero General Public License version 3 (AGPLv3) and a commercial license.
 
--   **Open Source Use**: For open-source projects and non-commercial use, this software is available under the AGPLv3. The AGPLv3 allows you to freely use, modify, and distribute this software, provided that all modifications and derivative works are also licensed under the AGPLv3. For the full license text, see the [LICENSE file](https://github.com/CoCreate-app/CoCreate-usage/blob/master/LICENSE).
+-   **Open Source Use**: For open-source projects and non-commercial use, this software is available under the AGPLv3. The AGPLv3 allows you to freely use, modify, and distribute this software, provided that all modifications and derivative works are also licensed under the AGPLv3. For the full license text, see the [LICENSE file](https://github.com/CoCreateJS/CoCreate-server-usage/blob/master/LICENSE).
 
 -   **Commercial Use**: For-profit companies and individuals intending to use this software for commercial purposes must obtain a commercial license. The commercial license is available when you sign up for an API key on our [website](https://cocreate.app). This license permits proprietary use and modification of the software without the copyleft requirements of the AGPLv3. It is ideal for integrating this software into proprietary commercial products and applications.
 

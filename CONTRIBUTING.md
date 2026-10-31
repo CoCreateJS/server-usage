@@ -1,19 +1,19 @@
-# Contributing to CoCreate-usage
+# Contributing to CoCreate Server Usage
 
-This project is work of [many contributors](https://github.com/CoCreate-app/CoCreate-usage/graphs/contributors).
-You're encouraged to submit [pull requests](https://github.com/CoCreate-app/CoCreate-usage/pulls),
-[propose features and discuss issues](https://github.com/CoCreate-app/CoCreate-usage/issues).
+This project is work of [many contributors](https://github.com/CoCreateJS/CoCreate-server-usage/graphs/contributors).
+You're encouraged to submit [pull requests](https://github.com/CoCreateJS/CoCreate-server-usage/pulls),
+[propose features and discuss issues](https://github.com/CoCreateJS/CoCreate-server-usage/issues).
 
 In the examples below, substitute your Github username for `contributor` in URLs.
 
 ## Fork the Project
 
-Fork the [project on Github](https://github.com/CoCreate-app/CoCreate-usage) and check out your copy.
+Fork the [project on Github](https://github.com/CoCreateJS/CoCreate-server-usage) and check out your copy.
 
 ```
-git clone https://github.com/contributor/CoCreate-usage.git
-cd CoCreate-usage
-git remote add upstream https://github.com/cocreatejs/CoCreate-usage.git
+git clone https://github.com/contributor/CoCreate-server-usage.git
+cd CoCreate-server-usage
+git remote add upstream https://github.com/CoCreateJS/CoCreate-server-usage.git
 ```
 
 ## Create a Topic Branch
@@ -74,7 +74,7 @@ git push origin my-feature-branch
 
 ## Make a Pull Request
 
-Go to [https://github.com/CoCreate-app/CoCreate-usage](https://github.com/CoCreate-app/CoCreate-usage) and select your feature branch.
+Go to [https://github.com/CoCreateJS/CoCreate-server-usage](https://github.com/CoCreateJS/CoCreate-server-usage) and select your feature branch.
 Click the 'Pull Request' button and fill out the form. Pull requests are usually reviewed within a few days.
 
 ## Rebase

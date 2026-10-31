@@ -1,16 +1,20 @@
 {
-  "name": "@cocreate/usage",
+  "name": "@cocreate/server-usage",
   "version": "1.9.0",
-  "description": "CoCreate-usage",
+  "description": "Server-side usage metering and billing ledgers for CoCreate organizations.",
   "keywords": [
-    "cocreate-usage",
-    "low-code",
-    "realtime",
-    "realtime-framework",
-    "collaboration",
-    "shared-editing",
-    "html5-framework",
-    "javascript-framework"
+    "cocreate-server-usage",
+    "server-usage",
+    "usage-metering",
+    "billing",
+    "ledger",
+    "payments",
+    "credits",
+    "organization-balance",
+    "pricing",
+    "consumption",
+    "webhooks",
+    "server"
   ],
   "type": "module",
   "cocreate": {
@@ -19,7 +23,7 @@
     ],
     "interface": {
       "schemaVersion": 1,
-      "summary": "CoCreate-usage",
+      "summary": "Server-side metering, immutable usage and credit ledgers, payment recording, and organization balance projections for CoCreate.",
       "source": "src/index.js",
       "api": {
         "exports": [
@@ -36,14 +40,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cocreatejs/CoCreate-usage.git"
+    "url": "git+https://github.com/CoCreateJS/CoCreate-server-usage.git"
   },
   "author": "CoCreate LLC",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/CoCreate-app/CoCreate-usage/issues"
+    "url": "https://github.com/CoCreateJS/CoCreate-server-usage/issues"
   },
-  "homepage": "https://cocreate.app/docs/CoCreate-usage",
+  "homepage": "https://cocreate.app/docs/server-usage",
   "scripts": {
     "demo": "PORT=5000 node demo/server.js",
     "test": "node --test"

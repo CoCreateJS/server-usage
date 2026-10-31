@@ -26,7 +26,7 @@ let usageConfig = {};                           // In-memory configuration regis
 
 function logPrefix() {
     const workerId = server?.workerId || process.env.WORKER_ID;
-    return `[@cocreate/usage] ${workerId ? `[WORKER ${workerId}]` : '[MASTER]'}`;
+    return `[@cocreate/server-usage] ${workerId ? `[WORKER ${workerId}]` : '[MASTER]'}`;
 }
 
 // Default configuration settings
