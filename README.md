@@ -7,9 +7,9 @@ CoCreate Server Usage is the server-side usage metering and billing ledger for C
 ![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=AGPL-3.0&color=green)
 ![Hiring](https://img.shields.io/static/v1?style=flat-square&label=&message=Hiring&color=blueviolet)
 
-![CoCreate](https://cdn.cocreate.app/logo.png)
+![CoCreate](https://cdn.CoCreateJS.com/logo.png)
 
-[CoCreate Server Usage Docs](https://cocreate.app/docs/server-usage)
+[CoCreate Server Usage Docs](https://CoCreateJS.com/docs/server-usage)
 
 ## Usage events
 
@@ -130,7 +130,7 @@ Unpriced bandwidth events continue to accept `type: "ingress"` and
 events continue through the interval-based AI aggregation path during the
 transition to resolved pricing.
 
-We want this library to be community-driven, and CoCreate led. We need your help to realize this goal. To help make sure we are building the right things in the right order, we ask that you create [issues](https://github.com/CoCreate-app/Realtime_Admin_CRM_and_CMS/issues) and [pull requests](https://github.com/CoCreate-app/Realtime_Admin_CRM_and_CMS/pulls) or merely upvote or comment on existing issues or pull requests.
+We want this library to be community-driven, and CoCreate led. We need your help to realize this goal. To help make sure we are building the right things in the right order, we ask that you create [issues](https://github.com/CoCreateJS/Realtime_Admin_CRM_and_CMS/issues) and [pull requests](https://github.com/CoCreateJS/Realtime_Admin_CRM_and_CMS/pulls) or merely upvote or comment on existing issues or pull requests.
 
 We appreciate your continued support, thank you!
 
@@ -161,7 +161,7 @@ If you are interested in the future direction of this project, please take a loo
 
 CoCreate Server Usage is guided and supported by the CoCreate Developer Experience Team.
 
-Please Email the Developer Experience Team [here](mailto:develop@cocreate.app) in case of any queries.
+Please Email the Developer Experience Team [here](mailto:develop@CoCreateJS.com) in case of any queries.
 
 CoCreate Server Usage is maintained and funded by CoCreate. The names and logos for CoCreate are trademarks of CoCreate, LLC.
 
@@ -179,6 +179,6 @@ This software is dual-licensed under the GNU Affero General Public License versi
 
 -   **Open Source Use**: For open-source projects and non-commercial use, this software is available under the AGPLv3. The AGPLv3 allows you to freely use, modify, and distribute this software, provided that all modifications and derivative works are also licensed under the AGPLv3. For the full license text, see the [LICENSE file](https://github.com/CoCreateJS/CoCreate-server-usage/blob/master/LICENSE).
 
--   **Commercial Use**: For-profit companies and individuals intending to use this software for commercial purposes must obtain a commercial license. The commercial license is available when you sign up for an API key on our [website](https://cocreate.app). This license permits proprietary use and modification of the software without the copyleft requirements of the AGPLv3. It is ideal for integrating this software into proprietary commercial products and applications.
+-   **Commercial Use**: For-profit companies and individuals intending to use this software for commercial purposes must obtain a commercial license. The commercial license is available when you sign up for an API key on our [website](https://CoCreateJS.com). This license permits proprietary use and modification of the software without the copyleft requirements of the AGPLv3. It is ideal for integrating this software into proprietary commercial products and applications.
 
 If you have not purchased a commercial license and intend to use this software for commercial purposes, you are required to sign up for an API key on our website.
