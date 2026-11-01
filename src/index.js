@@ -59,6 +59,8 @@ const aiTokenFields = [
 
 /**
  * Loads usage tracking configuration using @cocreate/config and queries database overrides.
+ * @private
+ * @environment server
  */
 async function loadUsageConfig() {
     try {
@@ -132,6 +134,8 @@ function initEventListeners() {
  *
  * @param {*} data - Payload to measure
  * @returns {number} Payload size in bytes
+ * @public
+ * @environment server
  */
 function calculatePayloadBytes(data) {
     if (data === null || data === undefined) return 0;
@@ -190,6 +194,8 @@ function hasResponseError(response) {
  * Calculates fixed-point charges from a resolved usage/pricing contract.
  * Every returned amount is an integer string at the returned precision,
  * avoiding floating-point currency arithmetic.
+ * @public
+ * @environment server
  */
 function calculatePrice({ usage = {}, pricing = [], precision } = {}) {
     if (!usage || typeof usage !== 'object' || Array.isArray(usage)) {
@@ -575,6 +581,8 @@ async function createPaymentTransaction(organization_id, options, provider, paym
  * Records a successful provider payment and projects it into the usage ledger.
  * Amount is supplied in the provider's smallest currency unit. For Stripe USD,
  * `{ amount: 5000, precision: 2 }` represents $50.00.
+ * @private
+ * @environment server
  */
 async function savePayment(organization_id, options) {
     if (!server?.crud) {
@@ -699,6 +707,8 @@ function payment(options = {}) {
  * `data` is the established event field; `payload` remains available as an alias.
  *
  * @param {Object} options - Usage transmission options
+ * @private
+ * @environment server
  */
 function send(options = {}) {
     if (!options || typeof options !== 'object') return;
@@ -788,6 +798,8 @@ function addAIUsage(group, provider, model, sample, reference, now) {
 /**
  * Accumulates one actual model-call usage sample. A single AI turn may produce
  * several samples when tools or sub-agents cause additional model calls.
+ * @private
+ * @environment server
  */
 function accumulateAI(options = {}) {
     const organization_id = options.organization_id;
@@ -841,6 +853,8 @@ async function flushAIWindow(organization_id) {
 
 /**
  * Internal helper to accumulate bandwidth metrics into memory buffers.
+ * @private
+ * @environment server
  */
 function accumulate(organization_id, ingressBytes = 0, egressBytes = 0) {
     if (!organization_id) return;
@@ -901,6 +915,8 @@ function accumulate(organization_id, ingressBytes = 0, egressBytes = 0) {
 
 /**
  * PIPELINE A: Handles the 1-minute interval flush to the tenant's servers_usage collection.
+ * @private
+ * @environment server
  */
 async function flushTenantWindow(organization_id) {
     const stats = bandwidthMap.get(organization_id);
@@ -923,6 +939,8 @@ async function flushTenantWindow(organization_id) {
 
 /**
  * PIPELINE B: Handles targeted platform flushes (when byte limit is reached).
+ * @private
+ * @environment server
  */
 async function flushPlatformWindow(organization_id) {
     const stats = bandwidthMap.get(organization_id);
@@ -948,6 +966,8 @@ async function flushPlatformWindow(organization_id) {
  * Called directly during org deletion or signal shedding (e.g. SIGTERM with orgId).
  *
  * @param {string} organization_id - Target organization ID
+ * @private
+ * @environment server
  */
 async function flushOrg(organization_id) {
     const stats = bandwidthMap.get(organization_id);
@@ -972,6 +992,8 @@ async function flushOrg(organization_id) {
  * If omitted, saves all tracked organizations currently in memory.
  *
  * @param {string} [organization_id] - Optional target organization ID
+ * @private
+ * @environment server
  */
 async function save(organization_id) {
     if (organization_id) {
@@ -1065,6 +1087,8 @@ async function saveAIToPlatformLedger(organization_id, stats) {
 /**
  * CRUD Adapter: Platform Bandwidth Collection (Private time-series log)
  * Writes into the platform's sandbox segment, cataloging target clients in "organization".
+ * @private
+ * @environment server
  */
 async function saveToLedgerDatabase(organization_id, stats) {
     try {
@@ -1097,6 +1121,8 @@ async function saveToLedgerDatabase(organization_id, stats) {
 /**
  * CRUD Adapter: Tenant Usage Collection (Their 1-Minute Dashboard Stream)
  * Writes directly to the tenant's partition under system collection "servers_usage".
+ * @private
+ * @environment server
  */
 async function saveToTenantBilling(organization_id, stats) {
     try {
@@ -1126,6 +1152,8 @@ async function saveToTenantBilling(organization_id, stats) {
 
 /**
  * Starts active usage tracking and binds process listeners.
+ * @private
+ * @environment server
  */
 function start() {
     if (isRunning) return;
@@ -1136,6 +1164,8 @@ function start() {
 
 /**
  * Stops usage tracking and clears active timers across all organizations.
+ * @private
+ * @environment server
  */
 function stop() {
     if (!isRunning) return;
@@ -1162,6 +1192,8 @@ function stop() {
  * @param {Object|string} serverInstance - Core server instance or platformOrgId
  * @param {Object} [options={}] - Additional initialization parameters
  * @returns {Promise<Object>} Public usage tracking service interface
+ * @public
+ * @environment server
  */
 async function init(serverInstance, options = {}) {
     if (serverInstance && typeof serverInstance === 'object') {
@@ -1204,3 +1236,10 @@ async function init(serverInstance, options = {}) {
 
 export { calculatePayloadBytes, calculatePrice };
 export default { init }
+
+/**
+ * Server-side metering, immutable usage and credit ledgers, payment recording, and organization balance projections for CoCreate.
+ *
+ * @module server-usage
+ * @environment server
+ */

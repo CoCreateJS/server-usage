@@ -17,23 +17,6 @@
     "server"
   ],
   "type": "module",
-  "cocreate": {
-    "environment": [
-      "server"
-    ],
-    "interface": {
-      "schemaVersion": 1,
-      "summary": "Server-side metering, immutable usage and credit ledgers, payment recording, and organization balance projections for CoCreate.",
-      "source": "src/index.js",
-      "api": {
-        "exports": [
-          "calculatePayloadBytes",
-          "calculatePrice",
-          "init"
-        ]
-      }
-    }
-  },
   "main": "./src/index.js",
   "publishConfig": {
     "access": "public"
