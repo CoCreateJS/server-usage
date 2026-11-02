@@ -1,3 +1,35 @@
+# [2.0.0](https://github.com/CoCreateJS/usage/compare/v1.4.1...v2.0.0) (2026-11-02)
+
+
+* refactor!: rename usage package to server-usage ([b8bfd0e](https://github.com/CoCreateJS/usage/commit/b8bfd0e5f5edcaf291b7f7b68bd891b2095fa03a))
+
+
+### Bug Fixes
+
+* add Deno specific entries to .gitignore ([064357b](https://github.com/CoCreateJS/usage/commit/064357beb36c50fce2833fc193c9f18f6250a0eb))
+* bump [@cocreate](https://github.com/cocreate) dependencies ([df6cead](https://github.com/CoCreateJS/usage/commit/df6cead1f320ae6392bee045cac55543d63d0e72))
+* bump versions ([28302b5](https://github.com/CoCreateJS/usage/commit/28302b53e8e9143dc0e62f347f89f6a84c0d7d44))
+* bumped dependencies ([a222434](https://github.com/CoCreateJS/usage/commit/a2224341edf84a0008880cabba4e5530ef2992d4))
+* missing dependencies ([f6f9b64](https://github.com/CoCreateJS/usage/commit/f6f9b648b3d7181a632eb32194dca37748426544))
+* remove trailing slash from node_modules entry in .gitignore ([a9129ad](https://github.com/CoCreateJS/usage/commit/a9129ad7fbe2854720628fc3f3e2fc4741ff0266))
+* restore usage payload byte calculation ([44ada2d](https://github.com/CoCreateJS/usage/commit/44ada2d0ed413834553f100055344ef52e09b794))
+* update buffer and database references from 'system' to 'server' ([817f918](https://github.com/CoCreateJS/usage/commit/817f918e04a000e723f9ebae73f803432464a362))
+* update copyright year and refactor usage tracking implementation ([d652fee](https://github.com/CoCreateJS/usage/commit/d652fee3ca6bbf2f3bac8c72c7910c7bc2e2de7b))
+* update git url ([6af6fe9](https://github.com/CoCreateJS/usage/commit/6af6fe923eb99d4379ae4b3a67a88acf70057af1))
+* update GitHub Actions to use latest versions and sync package.json description ([8fe2d1b](https://github.com/CoCreateJS/usage/commit/8fe2d1bcfbd38040b866cdedd5e1dc0f8438cf22))
+
+
+### Features
+
+* add @cocreate/crud-server dependency to package.json ([070bf5d](https://github.com/CoCreateJS/usage/commit/070bf5d0268e28f2e458477ffd82de3262126448))
+* bump all dependencies ([82da984](https://github.com/CoCreateJS/usage/commit/82da9845a4f27e98f09cc147fb87bf77d17597b3))
+* bumped all dependency versions ([8700f45](https://github.com/CoCreateJS/usage/commit/8700f4526041dfb49a2a07900c1fe5f026979769))
+
+
+### BREAKING CHANGES
+
+* package name changes from @cocreate/usage to @cocreate/server-usage; consumers must update their dependency name.
+
 ## [1.4.1](https://github.com/CoCreateJS/usage/compare/v1.4.0...v1.4.1) (2026-07-19)
 
 
