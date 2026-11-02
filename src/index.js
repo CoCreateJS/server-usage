@@ -26,7 +26,7 @@ let usageConfig = {};                           // In-memory configuration regis
 
 function logPrefix() {
     const workerId = server?.workerId || process.env.WORKER_ID;
-    return `[@cocreate/server-usage] ${workerId ? `[WORKER ${workerId}]` : '[MASTER]'}`;
+    return `[@cocreate/usage] ${workerId ? `[WORKER ${workerId}]` : '[MASTER]'}`;
 }
 
 // Default configuration settings
@@ -1218,7 +1218,7 @@ async function init(serverInstance, options = {}) {
 
     console.log(`${logPrefix()} Module initialized (Platform Org: ${platformOrgId}).`);
 
-    // Clean public API surface area matching @cocreate/server-telemetry style
+    // Clean public API surface area matching @cocreate/telemetry style
     return {
         config: usageConfig,
         start,
@@ -1240,6 +1240,6 @@ export default { init }
 /**
  * Server-side metering, immutable usage and credit ledgers, payment recording, and organization balance projections for CoCreate.
  *
- * @module server-usage
+ * @module usage
  * @environment server
  */
