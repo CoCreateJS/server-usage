@@ -36,8 +36,8 @@
     "test": "node --test"
   },
   "dependencies": {
-    "@cocreate/config": "^1.21.0",
-    "@cocreate/crud-server": "^1.42.0",
-    "@cocreate/utils": "^1.54.0"
+    "@cocreate/config": "^2.0.0",
+    "@cocreate/crud-server": "^2.0.0",
+    "@cocreate/utils": "^2.0.0"
   }
 }
