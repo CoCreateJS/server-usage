@@ -111,7 +111,7 @@ function initEventListeners() {
         });
     });
 
-    process.on('organization.evicted', (orgId) => {
+    process.on('orgDisconnected', (orgId, details = {}) => {
         flushOrg(orgId).catch(err => {
             console.error(`${logPrefix()} Error flushing org ${orgId} on deletion:`, err);
         });
