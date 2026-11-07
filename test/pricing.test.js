@@ -107,7 +107,8 @@ test('writes priced usage to tenant and platform ledgers', async () => {
             currency: 'USD',
             precision: 6
         }],
-        reference: { request_id: 'request-1' }
+        reference: { request_id: 'request-1' },
+        socket: { purpose: 'application data' }
     });
     service.stop();
 
@@ -116,6 +117,7 @@ test('writes priced usage to tenant and platform ledgers', async () => {
     assert.equal(writes[0].object.direction, 'debit');
     assert.equal(writes[0].object.amount, '1000000000000');
     assert.equal(writes[0].object.reference.request_id, 'request-1');
+    assert.deepEqual(writes[0].object.socket, { purpose: 'application data' });
     assert.equal(writes[1].organization_id, 'platform');
     assert.equal(writes[1].object.organization, 'tenant');
     assert.equal(writes[1].object.processed, false);
@@ -146,6 +148,7 @@ test('records incoming funds as credits in the same ledger', async () => {
 
     const entry = await service.credit({
         organization_id: 'tenant',
+        socket: { purpose: 'application data' },
         type: 'funds',
         amount: 2500000,
         currency: 'usd',
@@ -158,6 +161,7 @@ test('records incoming funds as credits in the same ledger', async () => {
     service.stop();
 
     assert.equal(entry.direction, 'credit');
+    assert.deepEqual(entry.socket, { purpose: 'application data' });
     assert.equal(entry.amount, '2500000000000');
     assert.equal(entry.currency, 'USD');
     assert.deepEqual(entry.sourceAmount, {

@@ -304,8 +304,7 @@ function createPricedUsageObject(organization_id, options) {
         'pricing',
         'sample',
         'data',
-        'payload',
-        'socket'
+        'payload'
     ]);
     const metadata = {};
 
@@ -346,8 +345,7 @@ function createCreditObject(organization_id, options) {
         'direction',
         'amount',
         'currency',
-        'precision',
-        'socket'
+        'precision'
     ]);
     const metadata = {};
 
