@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@cocreate/config": "^2.0.0",
-    "@cocreate/crud-server": "^2.0.0",
+    "@cocreate/crud": "^2.0.0",
     "@cocreate/utils": "^2.0.0"
   }
 }
