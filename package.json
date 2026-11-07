@@ -1,6 +1,6 @@
 {
   "name": "@cocreate/usage",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Server-side usage metering and billing ledgers for CoCreate organizations.",
   "keywords": [
     "cocreate-usage",

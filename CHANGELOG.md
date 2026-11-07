@@ -1,3 +1,11 @@
+## [2.0.2](https://github.com/CoCreateJS/usage/compare/v2.0.1...v2.0.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* flush organization usage on disconnect ([dd36be1](https://github.com/CoCreateJS/usage/commit/dd36be1d53f0fc483728eaac7fd7fad24cd41098))
+* normalize usage pricing calculations ([a84f144](https://github.com/CoCreateJS/usage/commit/a84f14418185011ba0d6399adfd7fba88b898450))
+
 ## [2.0.1](https://github.com/CoCreateJS/usage/compare/v2.0.0...v2.0.1) (2026-11-05)
 
 
